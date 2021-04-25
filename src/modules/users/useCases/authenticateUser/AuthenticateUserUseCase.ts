@@ -13,17 +13,17 @@ interface IRequest {
   password: string;
 }
 
-@injectable()
+//@injectable()
 export class AuthenticateUserUseCase {
   constructor(
-    @inject('UsersRepository')
+    //@inject('UsersRepository')
     private usersRepository: IUsersRepository,
-  ) {}
+  ) { }
 
   async execute({ email, password }: IRequest): Promise<IAuthenticateUserResponseDTO> {
     const user = await this.usersRepository.findByEmail(email);
 
-    if(!user) {
+    if (!user) {
       throw new IncorrectEmailOrPasswordError();
     }
 
@@ -33,11 +33,11 @@ export class AuthenticateUserUseCase {
       throw new IncorrectEmailOrPasswordError();
     }
 
-    const { secret, expiresIn } = authConfig.jwt;
+    //const { secret, expiresIn } = authConfig.jwt;
 
-    const token = sign({ user }, secret, {
+    const token = sign({ user }, "secret", {
       subject: user.id,
-      expiresIn,
+      expiresIn: "1d",
     });
 
     return {

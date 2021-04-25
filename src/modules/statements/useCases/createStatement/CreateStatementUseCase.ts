@@ -5,13 +5,13 @@ import { IStatementsRepository } from "../../repositories/IStatementsRepository"
 import { CreateStatementError } from "./CreateStatementError";
 import { ICreateStatementDTO } from "./ICreateStatementDTO";
 
-@injectable()
+//@injectable()
 export class CreateStatementUseCase {
   constructor(
-    @inject('UsersRepository')
+   // @inject('UsersRepository')
     private usersRepository: IUsersRepository,
 
-    @inject('StatementsRepository')
+   // @inject('StatementsRepository')
     private statementsRepository: IStatementsRepository
   ) {}
 
