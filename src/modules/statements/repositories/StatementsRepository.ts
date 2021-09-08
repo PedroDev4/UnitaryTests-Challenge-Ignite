@@ -23,7 +23,8 @@ export class StatementsRepository implements IStatementsRepository {
       user_id,
       amount,
       description,
-      type
+      type,
+
     });
 
     return this.repository.save(statement);
@@ -36,20 +37,33 @@ export class StatementsRepository implements IStatementsRepository {
   }
 
   async getUserBalance({ user_id, with_statement = false }: IGetBalanceDTO):
-    Promise<
-      { balance: number } | { balance: number, statement: Statement[] }
-    >
-  {
+    Promise<{ balance: number } | { balance: number, statement: Statement[] }> {
+
+    // Recuperando statements do usuario
     const statement = await this.repository.find({
       where: { user_id }
     });
 
-    const balance = statement.reduce((acc, operation) => {
-      if (operation.type === 'deposit') {
-        return acc + operation.amount;
+    // Operacionando valores
+    // ACC: valor anterior percorrido do array
+    // operation: valor atual no array
+    const balance = statement.reduce((prevValue, currentStatement) => {
+
+      if (currentStatement.type === 'deposit') {
+        return prevValue + currentStatement.amount;
+
+      } else if (currentStatement.type === 'transfer' && currentStatement.sender_id === user_id) {
+
+        return Number(prevValue - currentStatement.amount);
+
+      } else if (currentStatement.type === 'transfer' && currentStatement.user_id === user_id) {
+
+        return Number(prevValue + currentStatement.amount);
+
       } else {
-        return acc - operation.amount;
+        return prevValue - currentStatement.amount;
       }
+
     }, 0)
 
     if (with_statement) {

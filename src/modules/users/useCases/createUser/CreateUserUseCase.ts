@@ -6,10 +6,10 @@ import { CreateUserError } from "./CreateUserError";
 import { IUsersRepository } from "../../repositories/IUsersRepository";
 import { ICreateUserDTO } from "./ICreateUserDTO";
 
-//@injectable()
+@injectable()
 export class CreateUserUseCase {
   constructor(
-    //@inject('UsersRepository')
+    @inject('UsersRepository')
     private usersRepository: IUsersRepository,
   ) { }
 
