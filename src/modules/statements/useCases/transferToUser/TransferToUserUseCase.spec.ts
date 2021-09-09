@@ -38,14 +38,6 @@ describe("Transfer to user", () => {
             sender_id: null
         });
 
-        await inMemoryStatementsRepository.create({
-            amount: 20,
-            description: "First money",
-            type: OperationType.DEPOSIT,
-            user_id: userReceiver.id,
-            sender_id: null
-        });
-
         const transferStatement = await transferToUserUseCase.execute({
             amount: 30,
             description: "Barber Shop",
