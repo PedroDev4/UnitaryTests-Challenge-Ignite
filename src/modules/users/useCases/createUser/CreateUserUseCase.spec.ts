@@ -2,12 +2,10 @@ import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUs
 import { CreateUserError } from "./CreateUserError";
 import { CreateUserUseCase } from "./CreateUserUseCase";
 
-
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let createUserUseCase: CreateUserUseCase;
 
 describe("Create User", () => {
-
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
@@ -27,21 +25,16 @@ describe("Create User", () => {
     );
 
     expect(userCreated).toHaveProperty("id");
-
   });
 
-  it("Should not ne able to crete a new user with an existing email", () => {
-    expect(async () => {
-      const user = {
-        name: "User Test",
-        email: "User Email",
-        password: "User password",
-      };
+  it("Should not ne able to crete a new user with an existing email", async () => {
+    const user = {
+      name: "User Test",
+      email: "User Email",
+      password: "User password",
+    };
 
-      await createUserUseCase.execute(user);
-
-      await createUserUseCase.execute(user);
-
-    }).rejects.toBeInstanceOf(CreateUserError);
+    await createUserUseCase.execute(user);
+    await expect(createUserUseCase.execute(user)).rejects.toBeInstanceOf(CreateUserError);
   });
 });

@@ -1,9 +1,7 @@
 import { OperationType } from "@modules/statements/entities/Statement";
 import { InMemoryStatementsRepository } from "@modules/statements/repositories/in-memory/InMemoryStatementsRepository";
-import { IGetBalanceDTO } from "@modules/statements/useCases/getBalance/IGetBalanceDTO";
 import { InMemoryUsersRepository } from "@modules/users/repositories/in-memory/InMemoryUsersRepository";
 import { CreateUserUseCase } from "@modules/users/useCases/createUser/CreateUserUseCase";
-import { ICreateUserDTO } from "@modules/users/useCases/createUser/ICreateUserDTO";
 import { CreateStatementUseCase } from "../createStatement/CreateStatementUseCase";
 import { ICreateStatementDTO } from "../createStatement/ICreateStatementDTO";
 import { GetBalanceError } from "./GetBalanceError";
@@ -16,15 +14,16 @@ let createStatementsUseCase: CreateStatementUseCase;
 let getBalanceUseCase: GetBalanceUseCase;
 
 describe("Getting Balance of an user", () => {
-
   beforeEach(() => {
     usersRepositoryInMemory = new InMemoryUsersRepository();
     statementsRepositoryInMemory = new InMemoryStatementsRepository();
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
+
     createStatementsUseCase = new CreateStatementUseCase(
       usersRepositoryInMemory,
       statementsRepositoryInMemory
     );
+
     getBalanceUseCase = new GetBalanceUseCase(
       statementsRepositoryInMemory,
       usersRepositoryInMemory
@@ -44,6 +43,7 @@ describe("Getting Balance of an user", () => {
       amount: 150.0,
       description: "Description Test"
     }
+
     await createStatementsUseCase.execute(statement1);
 
     const statement2: ICreateStatementDTO = {
@@ -62,13 +62,9 @@ describe("Getting Balance of an user", () => {
     expect(balance.balance).toEqual(statement1.amount - statement2.amount);
   });
 
-  it("Should NOT be able to get balance of a non existing user", () => {
-    expect(async () => {
-      await getBalanceUseCase.execute({
-        user_id: "user_id example"
-      });
-    }).rejects.toBeInstanceOf(GetBalanceError);
+  it("Should NOT be able to get balance of a non existing user", async () => {
+    await expect(getBalanceUseCase.execute({
+      user_id: "user_id example"
+    })).rejects.toBeInstanceOf(GetBalanceError);
   });
-
-
 })

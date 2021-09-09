@@ -5,20 +5,24 @@ import { CreateUserUseCase } from "@modules/users/useCases/createUser/CreateUser
 import { CreateStatementUseCase } from "../createStatement/CreateStatementUseCase";
 import { ICreateStatementDTO } from "../createStatement/ICreateStatementDTO";
 import { GetStatementOperationError } from "./GetStatementOperationError";
-
+import { GetStatementOperationUseCase } from './GetStatementOperationUseCase'
 
 let usersRepositoryInMemory: InMemoryUsersRepository;
 let createUserUseCase: CreateUserUseCase;
 let statementsRepositoryInMemory: InMemoryStatementsRepository;
 let createStatementUseCase: CreateStatementUseCase;
+let getStatementOperationUseCase: GetStatementOperationUseCase;
 
 describe("Getting Statement Operation of user", () => {
-
   beforeEach(() => {
     usersRepositoryInMemory = new InMemoryUsersRepository();
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
     statementsRepositoryInMemory = new InMemoryStatementsRepository();
     createStatementUseCase = new CreateStatementUseCase(usersRepositoryInMemory, statementsRepositoryInMemory);
+    getStatementOperationUseCase = new GetStatementOperationUseCase(
+      usersRepositoryInMemory,
+      statementsRepositoryInMemory,
+    )
   });
 
   it("Should be able to Get a statement operation of an user", async () => {
@@ -32,8 +36,10 @@ describe("Getting Statement Operation of user", () => {
       user_id: user.id as string,
       type: OperationType.DEPOSIT,
       amount: 150.0,
-      description: "Description Test"
+      description: "Description Test",
+      sender_id: null,
     }
+
     const statement = await createStatementUseCase.execute(statement1_Object);
 
     const statement_operation = await statementsRepositoryInMemory.findStatementOperation({
@@ -48,33 +54,24 @@ describe("Getting Statement Operation of user", () => {
     expect(statement_operation).toHaveProperty("type");
   });
 
-  it("Should NOT be able to get a Statement Operation with a non-exinsting statement", () => {
+  it("Should NOT be able to get a Statement Operation with a non-exinsting statement", async () => {
+    const user = await usersRepositoryInMemory.create({
+      name: "User Name Test",
+      email: "User Email Test",
+      password: "User Password test",
+    });
 
-    expect(async () => {
-      const user = await createUserUseCase.execute({
-        name: "User Name Test",
-        email: "User Email Test",
-        password: "User Password test",
-      });
-
-      await statementsRepositoryInMemory.findStatementOperation({
+    await expect(
+      getStatementOperationUseCase.execute({
         user_id: user.id as string,
         statement_id: "statement id test",
-      });
-
-    }).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound);
-
+      })).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound);
   });
 
-  it("Should NOT be able to get a Statement Operation with a non-exinsting user", () => {
-    expect(async () => {
-      await statementsRepositoryInMemory.findStatementOperation({
-        user_id: "user_id test",
-        statement_id: "statement id test",
-      });
-
-    }).rejects.toBeInstanceOf(GetStatementOperationError.UserNotFound);
-
+  it("Should NOT be able to get a Statement Operation with a non-exinsting user", async () => {
+    await expect(getStatementOperationUseCase.execute({
+      user_id: "user_id test",
+      statement_id: "statement id test",
+    })).rejects.toBeInstanceOf(GetStatementOperationError.UserNotFound);
   });
-
 });

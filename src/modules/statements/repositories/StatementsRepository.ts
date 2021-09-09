@@ -44,24 +44,26 @@ export class StatementsRepository implements IStatementsRepository {
       where: { user_id }
     });
 
+    console.log(statement);
+
     // Operacionando valores
     // ACC: valor anterior percorrido do array
     // operation: valor atual no array
     const balance = statement.reduce((prevValue, currentStatement) => {
 
       if (currentStatement.type === 'deposit') {
-        return prevValue + currentStatement.amount;
+        return prevValue + Number(currentStatement.amount);
 
       } else if (currentStatement.type === 'transfer' && currentStatement.sender_id === user_id) {
 
-        return Number(prevValue - currentStatement.amount);
+        return prevValue - Number(currentStatement.amount);
 
       } else if (currentStatement.type === 'transfer' && currentStatement.user_id === user_id) {
 
-        return Number(prevValue + currentStatement.amount);
+        return prevValue + Number(currentStatement.amount);
 
       } else {
-        return prevValue - currentStatement.amount;
+        return prevValue - Number(currentStatement.amount);
       }
 
     }, 0)

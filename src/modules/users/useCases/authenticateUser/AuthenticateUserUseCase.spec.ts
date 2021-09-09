@@ -8,7 +8,6 @@ let authenticateUserUseCase: AuthenticateUserUseCase;
 let createUserUseCase: CreateUserUseCase;
 
 describe("Authenticate User", () => {
-
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
@@ -16,12 +15,10 @@ describe("Authenticate User", () => {
   });
 
   it("Should not be able to authenticate a non-existing user", async () => {
-    expect(async () => {
-      await authenticateUserUseCase.execute({
-        email: "user Email",
-        password: "User passWord test",
-      })
-    }).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
+    await expect(authenticateUserUseCase.execute({
+      email: "user Email",
+      password: "User passWord test",
+    })).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
   });
 
   it("Should be able to authenticate an exsisting user", async () => {
@@ -33,7 +30,6 @@ describe("Authenticate User", () => {
 
     await createUserUseCase.execute(user);
 
-
     const userAuthenticated = await authenticateUserUseCase.execute({
       email: user.email,
       password: user.password,
@@ -41,26 +37,20 @@ describe("Authenticate User", () => {
 
     expect(userAuthenticated).toHaveProperty("token");
     expect(userAuthenticated.user).toHaveProperty("id");
-
   });
-
 
   it("Should not be able to authenticate a user with an invalid password", async () => {
+    const user = {
+      name: "User Test",
+      email: "User Email",
+      password: "User password",
+    };
 
-    expect(async () => {
-      const user = {
-        name: "User Test3",
-        email: "User Email3",
-        password: "User password3",
-      };
-      await createUserUseCase.execute(user);
+    await createUserUseCase.execute(user);
 
-      await authenticateUserUseCase.execute({
-        email: user.email,
-        password: user.password,
-      });
-
-    }).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
+    await expect(authenticateUserUseCase.execute({
+      email: user.email,
+      password: '321',
+    })).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
   });
-
 });

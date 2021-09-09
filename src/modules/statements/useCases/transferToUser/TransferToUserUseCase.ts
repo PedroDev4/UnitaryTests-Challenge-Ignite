@@ -54,7 +54,8 @@ class TransferToUserUseCase {
             user_id: userSender.id,
             amount,
             description,
-            type: OperationType.TRANFER,
+            type: OperationType.TRANSFER,
+            sender_id: userSender.id
         });
 
         return {

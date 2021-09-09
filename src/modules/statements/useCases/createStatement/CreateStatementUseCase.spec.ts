@@ -22,17 +22,18 @@ describe("Creating a user Statement", () => {
     );
   });
 
-  it("should not be able to create a statement to a non-existing user", () => {
-    expect(async () => {
-      const statement: ICreateStatementDTO = {
-        user_id: "user ID Test",
-        type: OperationType.DEPOSIT,
-        amount: 150.0,
-        description: "Description Test"
-      }
+  it("should not be able to create a statement to a non-existing user", async () => {
+    const statement: ICreateStatementDTO = {
+      user_id: "user ID Test",
+      type: OperationType.DEPOSIT,
+      amount: 150.0,
+      description: "Description Test",
+      sender_id: null,
+    }
 
-      await createStatementsUseCase.execute(statement);
-    }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound);
+    await expect(
+      createStatementsUseCase.execute(statement)
+    ).rejects.toBeInstanceOf(CreateStatementError.UserNotFound);
   });
 
   it("Should be able to create a statement to a exsiting user", async () => {
@@ -46,7 +47,8 @@ describe("Creating a user Statement", () => {
       user_id: user.id as string,
       type: OperationType.DEPOSIT,
       amount: 150.0,
-      description: "Description Test"
+      description: "Description Test",
+      sender_id: null,
     }
 
     const userStatement = await createStatementsUseCase.execute(statement);
@@ -55,7 +57,6 @@ describe("Creating a user Statement", () => {
   });
 
   it("should be able to create a new withdraw to user", async () => {
-
     const user = await createUserUseCase.execute({
       name: "User Name Test",
       email: "User Email Test",
@@ -66,15 +67,18 @@ describe("Creating a user Statement", () => {
       user_id: user.id as string,
       type: OperationType.DEPOSIT,
       amount: 150.0,
-      description: "Description Test"
+      description: "Description Test",
+      sender_id: null,
     }
+
     await createStatementsUseCase.execute(statement);
 
     const statementWithdraw: ICreateStatementDTO = {
       user_id: user.id as string,
       type: OperationType.WITHDRAW,
       amount: 100.0,
-      description: "Description Test"
+      description: "Description Test",
+      sender_id: null,
     }
 
     const userStatementWithdraw = await createStatementsUseCase.execute(statementWithdraw);
@@ -83,30 +87,31 @@ describe("Creating a user Statement", () => {
   });
 
   it("should NOT be able to create a new withdraw to user with insuficient funds", async () => {
-    expect(async () => {
-      const user = await createUserUseCase.execute({
-        name: "User Name Test",
-        email: "User Email Test",
-        password: "User Password test",
-      });
+    const user = await createUserUseCase.execute({
+      name: "User Name Test",
+      email: "User Email Test",
+      password: "User Password test",
+    });
 
-      const statement: ICreateStatementDTO = {
-        user_id: user.id as string,
-        type: OperationType.DEPOSIT,
-        amount: 100.0,
-        description: "Description Test"
-      }
-      await createStatementsUseCase.execute(statement);
+    const statement: ICreateStatementDTO = {
+      user_id: user.id as string,
+      type: OperationType.DEPOSIT,
+      amount: 100.0,
+      description: "Description Test",
+      sender_id: null
+    }
+    await createStatementsUseCase.execute(statement);
 
-      const statementWithdraw: ICreateStatementDTO = {
-        user_id: user.id as string,
-        type: OperationType.WITHDRAW,
-        amount: 150.0,
-        description: "Description Test"
-      }
+    const statementWithdraw: ICreateStatementDTO = {
+      user_id: user.id as string,
+      type: OperationType.WITHDRAW,
+      amount: 150.0,
+      description: "Description Test",
+      sender_id: null,
+    }
 
-      await createStatementsUseCase.execute(statementWithdraw);
-    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
+    await expect(
+      createStatementsUseCase.execute(statementWithdraw)
+    ).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
   });
-
 });
